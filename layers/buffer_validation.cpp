@@ -106,8 +106,7 @@ bool IMAGE_STATE::IsCreateInfoEqual(VkImageCreateInfo &other_createInfo) {
         (createInfo.imageType == other_createInfo.imageType) && (createInfo.format == other_createInfo.format) &&
         (createInfo.mipLevels == other_createInfo.mipLevels) && (createInfo.arrayLayers == other_createInfo.arrayLayers) &&
         (createInfo.samples == other_createInfo.samples) && (createInfo.tiling == other_createInfo.tiling) &&
-        (createInfo.usage == other_createInfo.usage) &&
-        (createInfo.sharingMode == other_createInfo.sharingMode) &&
+        (createInfo.usage == other_createInfo.usage) && (createInfo.sharingMode == other_createInfo.sharingMode) &&
         (createInfo.queueFamilyIndexCount == other_createInfo.queueFamilyIndexCount) &&
         (createInfo.initialLayout == other_createInfo.initialLayout) &&
         (createInfo.extent.depth == other_createInfo.extent.depth) && (createInfo.extent.width == other_createInfo.extent.width) &&
@@ -129,6 +128,11 @@ bool IMAGE_STATE::IsCompatibleAliasing(IMAGE_STATE &other_image_state) {
     if ((binding.mem == other_image_state.binding.mem) && (binding.mem != VK_NULL_HANDLE) &&
         (binding.mem != MEMTRACKER_SWAP_CHAIN_IMAGE_KEY) && (binding.offset == other_image_state.binding.offset) &&
         IsCreateInfoEqual(other_image_state.createInfo)) {
+        aliasing_images.insert(other_image_state.image);
+        other_image_state.aliasing_images.insert(this->image);
+        return true;
+    }
+    if ((bind_swapchain == other_image_state.bind_swapchain) && (bind_swapchain != VK_NULL_HANDLE)) {
         aliasing_images.insert(other_image_state.image);
         other_image_state.aliasing_images.insert(this->image);
         return true;
@@ -1518,6 +1522,7 @@ void ValidationStateTracker::PostCallRecordCreateImage(VkDevice device, const Vk
     }
     const auto swapchain_info = lvl_find_in_chain<VkImageSwapchainCreateInfoKHR>(pCreateInfo->pNext);
     if (swapchain_info) {
+        is_node->binding.mem = MEMTRACKER_SWAP_CHAIN_IMAGE_KEY;
         is_node->create_from_swapchain = swapchain_info->swapchain;
     }
     imageMap.insert(std::make_pair(*pImage, std::unique_ptr<IMAGE_STATE>(is_node)));
