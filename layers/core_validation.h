@@ -1212,6 +1212,9 @@ class CoreChecks : public ValidationStateTracker {
 
     void TransitionImageLayouts(CMD_BUFFER_STATE* cb_state, uint32_t memBarrierCount, const VkImageMemoryBarrier* pImgMemBarriers);
 
+    void RecordTransmitImageLayout(CMD_BUFFER_STATE* cb_state, const IMAGE_STATE* image_state,
+                                   const VkImageMemoryBarrier& mem_barrier);
+
     void TransitionFinalSubpassLayouts(CMD_BUFFER_STATE* pCB, const VkRenderPassBeginInfo* pRenderPassBegin,
                                        FRAMEBUFFER_STATE* framebuffer_state);
 
