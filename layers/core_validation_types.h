@@ -314,6 +314,10 @@ class IMAGE_STATE : public BINDABLE {
     IMAGE_STATE(VkImage img, const VkImageCreateInfo *pCreateInfo);
     IMAGE_STATE(IMAGE_STATE const &rh_obj) = delete;
 
+    std::unordered_set<VkImage> aliasing_images;
+    bool IsCreateInfoEqual(VkImageCreateInfo &other_createInfo);
+    bool IsCompatibleAliasing(IMAGE_STATE &other_image_state);
+
     ~IMAGE_STATE() {
         if ((createInfo.sharingMode == VK_SHARING_MODE_CONCURRENT) && (createInfo.queueFamilyIndexCount > 0)) {
             delete[] createInfo.pQueueFamilyIndices;
@@ -423,6 +427,7 @@ class SWAPCHAIN_NODE {
     safe_VkSwapchainCreateInfoKHR createInfo;
     VkSwapchainKHR swapchain;
     std::vector<VkImage> images;
+    std::unordered_set<uint64_t> bound_images;
     bool retired = false;
     bool shared_presentable = false;
     CALL_STATE vkGetSwapchainImagesKHRState = UNCALLED;
