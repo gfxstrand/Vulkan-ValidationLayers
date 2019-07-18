@@ -1204,8 +1204,11 @@ class HelperFileOutputGenerator(OutputGenerator):
                                    '    if (pCode)\n'
                                    '        delete[] reinterpret_cast<const uint8_t *>(pCode);\n' }
 
+            has_pnext = False
             for member in item.members:
                 m_type = member.type
+                if member.name == 'pNext':
+                    has_pnext = True
                 if member.type in self.structNames:
                     member_index = next((i for i, v in enumerate(self.structMembers) if v[0] == member.type), None)
                     if member_index is not None and self.NeedSafeStruct(self.structMembers[member_index]) == True:
@@ -1213,9 +1216,10 @@ class HelperFileOutputGenerator(OutputGenerator):
                 if member.ispointer and 'safe_' not in m_type and self.TypeContainsObjectHandle(member.type, False) == False:
                     # Ptr types w/o a safe_struct, for non-null case need to allocate new ptr and copy data in
                     if m_type in ['void', 'char']:
-                        # For these exceptions just copy initial value over for now
-                        init_list += '\n    %s(in_struct->%s),' % (member.name, member.name)
-                        init_func_txt += '    %s = in_struct->%s;\n' % (member.name, member.name)
+                        if member.name != 'pNext':
+                            # For these exceptions just copy initial value over for now
+                            init_list += '\n    %s(in_struct->%s),' % (member.name, member.name)
+                            init_func_txt += '    %s = in_struct->%s;\n' % (member.name, member.name)
                     else:
                         default_init_list += '\n    %s(nullptr),' % (member.name)
                         init_list += '\n    %s(nullptr),' % (member.name)
@@ -1223,20 +1227,19 @@ class HelperFileOutputGenerator(OutputGenerator):
                             construct_txt += '    %s = in_struct->%s;\n' % (member.name, member.name)
                         else:
                             init_func_txt += '    %s = nullptr;\n' % (member.name)
-                            if 'pNext' != member.name and 'void' not in m_type:
-                                if not member.isstaticarray and (member.len is None or '/' in member.len):
-                                    construct_txt += '    if (in_struct->%s) {\n' % member.name
-                                    construct_txt += '        %s = new %s(*in_struct->%s);\n' % (member.name, m_type, member.name)
-                                    construct_txt += '    }\n'
-                                    destruct_txt += '    if (%s)\n' % member.name
-                                    destruct_txt += '        delete %s;\n' % member.name
-                                else:
-                                    construct_txt += '    if (in_struct->%s) {\n' % member.name
-                                    construct_txt += '        %s = new %s[in_struct->%s];\n' % (member.name, m_type, member.len)
-                                    construct_txt += '        memcpy ((void *)%s, (void *)in_struct->%s, sizeof(%s)*in_struct->%s);\n' % (member.name, member.name, m_type, member.len)
-                                    construct_txt += '    }\n'
-                                    destruct_txt += '    if (%s)\n' % member.name
-                                    destruct_txt += '        delete[] %s;\n' % member.name
+                            if not member.isstaticarray and (member.len is None or '/' in member.len):
+                                construct_txt += '    if (in_struct->%s) {\n' % member.name
+                                construct_txt += '        %s = new %s(*in_struct->%s);\n' % (member.name, m_type, member.name)
+                                construct_txt += '    }\n'
+                                destruct_txt += '    if (%s)\n' % member.name
+                                destruct_txt += '        delete %s;\n' % member.name
+                            else:
+                                construct_txt += '    if (in_struct->%s) {\n' % member.name
+                                construct_txt += '        %s = new %s[in_struct->%s];\n' % (member.name, m_type, member.len)
+                                construct_txt += '        memcpy ((void *)%s, (void *)in_struct->%s, sizeof(%s)*in_struct->%s);\n' % (member.name, member.name, m_type, member.len)
+                                construct_txt += '    }\n'
+                                destruct_txt += '    if (%s)\n' % member.name
+                                destruct_txt += '        delete[] %s;\n' % member.name
                 elif member.isstaticarray or member.len is not None:
                     if member.len is None:
                         # Extract length of static array by grabbing val between []
@@ -1282,6 +1285,13 @@ class HelperFileOutputGenerator(OutputGenerator):
                 init_list = init_list[:-1] # hack off final comma
             if item.name in custom_construct_txt:
                 construct_txt = custom_construct_txt[item.name]
+
+            # Add pNext copy call if necessary
+            copy_pnext = ''
+            if has_pnext:
+                copy_pnext = '    pNext = SafePnextCopy(in_struct->pNext);\n'
+                construct_txt = copy_pnext + construct_txt
+
             if item.name in custom_destruct_txt:
                 destruct_txt = custom_destruct_txt[item.name]
             safe_struct_body.append("\n%s::%s(const %s* in_struct%s) :%s\n{\n%s}" % (ss_name, ss_name, item.name, self.custom_construct_params.get(item.name, ''), init_list, construct_txt))
@@ -1290,11 +1300,18 @@ class HelperFileOutputGenerator(OutputGenerator):
             safe_struct_body.append("\n%s::%s()%s\n{}" % (ss_name, ss_name, default_init_list))
             # Create slight variation of init and construct txt for copy constructor that takes a src object reference vs. struct ptr
             copy_construct_init = init_func_txt.replace('in_struct->', 'src.')
-            copy_construct_txt = construct_txt.replace(' (in_struct->', ' (src.')     # Exclude 'if' blocks from next line
-            copy_construct_txt = copy_construct_txt.replace('(in_struct->', '(*src.') # Pass object to copy constructors
-            copy_construct_txt = copy_construct_txt.replace('in_struct->', 'src.')    # Modify remaining struct refs for src object
+            copy_construct_txt = construct_txt.replace(' (in_struct->', ' (src.')            # Exclude 'if' blocks from next line
+            copy_construct_txt = copy_construct_txt.replace('(in_struct->', '(*src.')        # Pass object to copy constructors
+            copy_construct_txt = copy_construct_txt.replace('in_struct->', 'src.')           # Modify remaining struct refs for src object
+            copy_construct_txt = copy_construct_txt.replace('(*src.pNext)', '(src.pNext)')   # pNext members don't need the deref
+            copy_construct_txt = copy_construct_txt.replace('(*src->pNext)', '(src->pNext)') # pNext members don't need the deref
+
             if item.name in custom_copy_txt:
-                copy_construct_txt = custom_copy_txt[item.name]
+                copy_pnext = ''
+                if has_pnext:
+                    copy_pnext = copy_construct_txt.split('\n', 1)[0] + '\n'
+                copy_construct_txt = copy_pnext + custom_copy_txt[item.name]
+
             copy_assign_txt = '    if (&src == this) return *this;\n\n' + destruct_txt + '\n' + copy_construct_init + copy_construct_txt + '\n    return *this;'
             safe_struct_body.append("\n%s::%s(const %s& src)\n{\n%s%s}" % (ss_name, ss_name, ss_name, copy_construct_init, copy_construct_txt)) # Copy constructor
             safe_struct_body.append("\n%s& %s::operator=(const %s& src)\n{\n%s\n}" % (ss_name, ss_name, ss_name, copy_assign_txt)) # Copy assignment operator
