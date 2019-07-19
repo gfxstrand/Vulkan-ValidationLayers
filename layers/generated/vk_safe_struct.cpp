@@ -11523,9 +11523,9 @@ void safe_VkPresentRegionsKHR::initialize(const safe_VkPresentRegionsKHR* src)
 
 safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR(const VkPhysicalDeviceImagelessFramebufferFeaturesKHR* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     imagelessFramebuffer(in_struct->imagelessFramebuffer)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR()
@@ -11534,8 +11534,8 @@ safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::safe_VkPhysicalDeviceImage
 safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR(const safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     imagelessFramebuffer = src.imagelessFramebuffer;
+    pNext = SafePnextCopy(src.pNext);
 }
 
 safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR& safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::operator=(const safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR& src)
@@ -11544,8 +11544,8 @@ safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR& safe_VkPhysicalDeviceImage
 
 
     sType = src.sType;
-    pNext = src.pNext;
     imagelessFramebuffer = src.imagelessFramebuffer;
+    pNext = SafePnextCopy(src.pNext);
 
     return *this;
 }
@@ -11557,20 +11557,19 @@ safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::~safe_VkPhysicalDeviceImag
 void safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::initialize(const VkPhysicalDeviceImagelessFramebufferFeaturesKHR* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     imagelessFramebuffer = in_struct->imagelessFramebuffer;
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 void safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR::initialize(const safe_VkPhysicalDeviceImagelessFramebufferFeaturesKHR* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     imagelessFramebuffer = src->imagelessFramebuffer;
+    pNext = SafePnextCopy(src->pNext);
 }
 
 safe_VkFramebufferAttachmentImageInfoKHR::safe_VkFramebufferAttachmentImageInfoKHR(const VkFramebufferAttachmentImageInfoKHR* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     flags(in_struct->flags),
     usage(in_struct->usage),
     width(in_struct->width),
@@ -11579,6 +11578,7 @@ safe_VkFramebufferAttachmentImageInfoKHR::safe_VkFramebufferAttachmentImageInfoK
     viewFormatCount(in_struct->viewFormatCount),
     pViewFormats(nullptr)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
     if (in_struct->pViewFormats) {
         pViewFormats = new VkFormat[in_struct->viewFormatCount];
         memcpy ((void *)pViewFormats, (void *)in_struct->pViewFormats, sizeof(VkFormat)*in_struct->viewFormatCount);
@@ -11592,7 +11592,6 @@ safe_VkFramebufferAttachmentImageInfoKHR::safe_VkFramebufferAttachmentImageInfoK
 safe_VkFramebufferAttachmentImageInfoKHR::safe_VkFramebufferAttachmentImageInfoKHR(const safe_VkFramebufferAttachmentImageInfoKHR& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     flags = src.flags;
     usage = src.usage;
     width = src.width;
@@ -11600,6 +11599,7 @@ safe_VkFramebufferAttachmentImageInfoKHR::safe_VkFramebufferAttachmentImageInfoK
     layerCount = src.layerCount;
     viewFormatCount = src.viewFormatCount;
     pViewFormats = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (src.pViewFormats) {
         pViewFormats = new VkFormat[src.viewFormatCount];
         memcpy ((void *)pViewFormats, (void *)src.pViewFormats, sizeof(VkFormat)*src.viewFormatCount);
@@ -11614,7 +11614,6 @@ safe_VkFramebufferAttachmentImageInfoKHR& safe_VkFramebufferAttachmentImageInfoK
         delete[] pViewFormats;
 
     sType = src.sType;
-    pNext = src.pNext;
     flags = src.flags;
     usage = src.usage;
     width = src.width;
@@ -11622,6 +11621,7 @@ safe_VkFramebufferAttachmentImageInfoKHR& safe_VkFramebufferAttachmentImageInfoK
     layerCount = src.layerCount;
     viewFormatCount = src.viewFormatCount;
     pViewFormats = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (src.pViewFormats) {
         pViewFormats = new VkFormat[src.viewFormatCount];
         memcpy ((void *)pViewFormats, (void *)src.pViewFormats, sizeof(VkFormat)*src.viewFormatCount);
@@ -11639,7 +11639,6 @@ safe_VkFramebufferAttachmentImageInfoKHR::~safe_VkFramebufferAttachmentImageInfo
 void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const VkFramebufferAttachmentImageInfoKHR* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     flags = in_struct->flags;
     usage = in_struct->usage;
     width = in_struct->width;
@@ -11647,6 +11646,7 @@ void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const VkFramebufferAtt
     layerCount = in_struct->layerCount;
     viewFormatCount = in_struct->viewFormatCount;
     pViewFormats = nullptr;
+    pNext = SafePnextCopy(in_struct->pNext);
     if (in_struct->pViewFormats) {
         pViewFormats = new VkFormat[in_struct->viewFormatCount];
         memcpy ((void *)pViewFormats, (void *)in_struct->pViewFormats, sizeof(VkFormat)*in_struct->viewFormatCount);
@@ -11656,7 +11656,6 @@ void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const VkFramebufferAtt
 void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const safe_VkFramebufferAttachmentImageInfoKHR* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     flags = src->flags;
     usage = src->usage;
     width = src->width;
@@ -11664,6 +11663,7 @@ void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const safe_VkFramebuff
     layerCount = src->layerCount;
     viewFormatCount = src->viewFormatCount;
     pViewFormats = nullptr;
+    pNext = SafePnextCopy(src->pNext);
     if (src->pViewFormats) {
         pViewFormats = new VkFormat[src->viewFormatCount];
         memcpy ((void *)pViewFormats, (void *)src->pViewFormats, sizeof(VkFormat)*src->viewFormatCount);
@@ -11672,10 +11672,10 @@ void safe_VkFramebufferAttachmentImageInfoKHR::initialize(const safe_VkFramebuff
 
 safe_VkFramebufferAttachmentsCreateInfoKHR::safe_VkFramebufferAttachmentsCreateInfoKHR(const VkFramebufferAttachmentsCreateInfoKHR* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     attachmentImageInfoCount(in_struct->attachmentImageInfoCount),
     pAttachmentImageInfos(nullptr)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
     if (attachmentImageInfoCount && in_struct->pAttachmentImageInfos) {
         pAttachmentImageInfos = new safe_VkFramebufferAttachmentImageInfoKHR[attachmentImageInfoCount];
         for (uint32_t i=0; i<attachmentImageInfoCount; ++i) {
@@ -11691,9 +11691,9 @@ safe_VkFramebufferAttachmentsCreateInfoKHR::safe_VkFramebufferAttachmentsCreateI
 safe_VkFramebufferAttachmentsCreateInfoKHR::safe_VkFramebufferAttachmentsCreateInfoKHR(const safe_VkFramebufferAttachmentsCreateInfoKHR& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     attachmentImageInfoCount = src.attachmentImageInfoCount;
     pAttachmentImageInfos = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (attachmentImageInfoCount && src.pAttachmentImageInfos) {
         pAttachmentImageInfos = new safe_VkFramebufferAttachmentImageInfoKHR[attachmentImageInfoCount];
         for (uint32_t i=0; i<attachmentImageInfoCount; ++i) {
@@ -11710,9 +11710,9 @@ safe_VkFramebufferAttachmentsCreateInfoKHR& safe_VkFramebufferAttachmentsCreateI
         delete[] pAttachmentImageInfos;
 
     sType = src.sType;
-    pNext = src.pNext;
     attachmentImageInfoCount = src.attachmentImageInfoCount;
     pAttachmentImageInfos = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (attachmentImageInfoCount && src.pAttachmentImageInfos) {
         pAttachmentImageInfos = new safe_VkFramebufferAttachmentImageInfoKHR[attachmentImageInfoCount];
         for (uint32_t i=0; i<attachmentImageInfoCount; ++i) {
@@ -11732,9 +11732,9 @@ safe_VkFramebufferAttachmentsCreateInfoKHR::~safe_VkFramebufferAttachmentsCreate
 void safe_VkFramebufferAttachmentsCreateInfoKHR::initialize(const VkFramebufferAttachmentsCreateInfoKHR* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     attachmentImageInfoCount = in_struct->attachmentImageInfoCount;
     pAttachmentImageInfos = nullptr;
+    pNext = SafePnextCopy(in_struct->pNext);
     if (attachmentImageInfoCount && in_struct->pAttachmentImageInfos) {
         pAttachmentImageInfos = new safe_VkFramebufferAttachmentImageInfoKHR[attachmentImageInfoCount];
         for (uint32_t i=0; i<attachmentImageInfoCount; ++i) {
@@ -11746,9 +11746,9 @@ void safe_VkFramebufferAttachmentsCreateInfoKHR::initialize(const VkFramebufferA
 void safe_VkFramebufferAttachmentsCreateInfoKHR::initialize(const safe_VkFramebufferAttachmentsCreateInfoKHR* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     attachmentImageInfoCount = src->attachmentImageInfoCount;
     pAttachmentImageInfos = nullptr;
+    pNext = SafePnextCopy(src->pNext);
     if (attachmentImageInfoCount && src->pAttachmentImageInfos) {
         pAttachmentImageInfos = new safe_VkFramebufferAttachmentImageInfoKHR[attachmentImageInfoCount];
         for (uint32_t i=0; i<attachmentImageInfoCount; ++i) {
@@ -11759,10 +11759,10 @@ void safe_VkFramebufferAttachmentsCreateInfoKHR::initialize(const safe_VkFramebu
 
 safe_VkRenderPassAttachmentBeginInfoKHR::safe_VkRenderPassAttachmentBeginInfoKHR(const VkRenderPassAttachmentBeginInfoKHR* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     attachmentCount(in_struct->attachmentCount),
     pAttachments(nullptr)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
     if (attachmentCount && in_struct->pAttachments) {
         pAttachments = new VkImageView[attachmentCount];
         for (uint32_t i=0; i<attachmentCount; ++i) {
@@ -11778,9 +11778,9 @@ safe_VkRenderPassAttachmentBeginInfoKHR::safe_VkRenderPassAttachmentBeginInfoKHR
 safe_VkRenderPassAttachmentBeginInfoKHR::safe_VkRenderPassAttachmentBeginInfoKHR(const safe_VkRenderPassAttachmentBeginInfoKHR& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     attachmentCount = src.attachmentCount;
     pAttachments = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (attachmentCount && src.pAttachments) {
         pAttachments = new VkImageView[attachmentCount];
         for (uint32_t i=0; i<attachmentCount; ++i) {
@@ -11797,9 +11797,9 @@ safe_VkRenderPassAttachmentBeginInfoKHR& safe_VkRenderPassAttachmentBeginInfoKHR
         delete[] pAttachments;
 
     sType = src.sType;
-    pNext = src.pNext;
     attachmentCount = src.attachmentCount;
     pAttachments = nullptr;
+    pNext = SafePnextCopy(src.pNext);
     if (attachmentCount && src.pAttachments) {
         pAttachments = new VkImageView[attachmentCount];
         for (uint32_t i=0; i<attachmentCount; ++i) {
@@ -11819,9 +11819,9 @@ safe_VkRenderPassAttachmentBeginInfoKHR::~safe_VkRenderPassAttachmentBeginInfoKH
 void safe_VkRenderPassAttachmentBeginInfoKHR::initialize(const VkRenderPassAttachmentBeginInfoKHR* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     attachmentCount = in_struct->attachmentCount;
     pAttachments = nullptr;
+    pNext = SafePnextCopy(in_struct->pNext);
     if (attachmentCount && in_struct->pAttachments) {
         pAttachments = new VkImageView[attachmentCount];
         for (uint32_t i=0; i<attachmentCount; ++i) {
@@ -11833,9 +11833,9 @@ void safe_VkRenderPassAttachmentBeginInfoKHR::initialize(const VkRenderPassAttac
 void safe_VkRenderPassAttachmentBeginInfoKHR::initialize(const safe_VkRenderPassAttachmentBeginInfoKHR* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     attachmentCount = src->attachmentCount;
     pAttachments = nullptr;
+    pNext = SafePnextCopy(src->pNext);
     if (attachmentCount && src->pAttachments) {
         pAttachments = new VkImageView[attachmentCount];
         for (uint32_t i=0; i<attachmentCount; ++i) {
@@ -25232,9 +25232,9 @@ void safe_VkPhysicalDeviceHostQueryResetFeaturesEXT::initialize(const safe_VkPhy
 
 safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(const VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     shaderDemoteToHelperInvocation(in_struct->shaderDemoteToHelperInvocation)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT()
@@ -25243,8 +25243,8 @@ safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::safe_VkPhysicalD
 safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(const safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     shaderDemoteToHelperInvocation = src.shaderDemoteToHelperInvocation;
+    pNext = SafePnextCopy(src.pNext);
 }
 
 safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT& safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::operator=(const safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT& src)
@@ -25253,8 +25253,8 @@ safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT& safe_VkPhysicalD
 
 
     sType = src.sType;
-    pNext = src.pNext;
     shaderDemoteToHelperInvocation = src.shaderDemoteToHelperInvocation;
+    pNext = SafePnextCopy(src.pNext);
 
     return *this;
 }
@@ -25266,22 +25266,22 @@ safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::~safe_VkPhysical
 void safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::initialize(const VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     shaderDemoteToHelperInvocation = in_struct->shaderDemoteToHelperInvocation;
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 void safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT::initialize(const safe_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     shaderDemoteToHelperInvocation = src->shaderDemoteToHelperInvocation;
+    pNext = SafePnextCopy(src->pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     texelBufferAlignment(in_struct->texelBufferAlignment)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT()
@@ -25290,8 +25290,8 @@ safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::safe_VkPhysicalDeviceTexel
 safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(const safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     texelBufferAlignment = src.texelBufferAlignment;
+    pNext = SafePnextCopy(src.pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT& safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::operator=(const safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT& src)
@@ -25300,8 +25300,8 @@ safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT& safe_VkPhysicalDeviceTexel
 
 
     sType = src.sType;
-    pNext = src.pNext;
     texelBufferAlignment = src.texelBufferAlignment;
+    pNext = SafePnextCopy(src.pNext);
 
     return *this;
 }
@@ -25313,25 +25313,25 @@ safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::~safe_VkPhysicalDeviceTexe
 void safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::initialize(const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     texelBufferAlignment = in_struct->texelBufferAlignment;
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 void safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT::initialize(const safe_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     texelBufferAlignment = src->texelBufferAlignment;
+    pNext = SafePnextCopy(src->pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* in_struct) :
     sType(in_struct->sType),
-    pNext(in_struct->pNext),
     storageTexelBufferOffsetAlignmentBytes(in_struct->storageTexelBufferOffsetAlignmentBytes),
     storageTexelBufferOffsetSingleTexelAlignment(in_struct->storageTexelBufferOffsetSingleTexelAlignment),
     uniformTexelBufferOffsetAlignmentBytes(in_struct->uniformTexelBufferOffsetAlignmentBytes),
     uniformTexelBufferOffsetSingleTexelAlignment(in_struct->uniformTexelBufferOffsetSingleTexelAlignment)
 {
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT()
@@ -25340,11 +25340,11 @@ safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::safe_VkPhysicalDeviceTex
 safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(const safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT& src)
 {
     sType = src.sType;
-    pNext = src.pNext;
     storageTexelBufferOffsetAlignmentBytes = src.storageTexelBufferOffsetAlignmentBytes;
     storageTexelBufferOffsetSingleTexelAlignment = src.storageTexelBufferOffsetSingleTexelAlignment;
     uniformTexelBufferOffsetAlignmentBytes = src.uniformTexelBufferOffsetAlignmentBytes;
     uniformTexelBufferOffsetSingleTexelAlignment = src.uniformTexelBufferOffsetSingleTexelAlignment;
+    pNext = SafePnextCopy(src.pNext);
 }
 
 safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT& safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::operator=(const safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT& src)
@@ -25353,11 +25353,11 @@ safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT& safe_VkPhysicalDeviceTex
 
 
     sType = src.sType;
-    pNext = src.pNext;
     storageTexelBufferOffsetAlignmentBytes = src.storageTexelBufferOffsetAlignmentBytes;
     storageTexelBufferOffsetSingleTexelAlignment = src.storageTexelBufferOffsetSingleTexelAlignment;
     uniformTexelBufferOffsetAlignmentBytes = src.uniformTexelBufferOffsetAlignmentBytes;
     uniformTexelBufferOffsetSingleTexelAlignment = src.uniformTexelBufferOffsetSingleTexelAlignment;
+    pNext = SafePnextCopy(src.pNext);
 
     return *this;
 }
@@ -25369,21 +25369,21 @@ safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::~safe_VkPhysicalDeviceTe
 void safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::initialize(const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* in_struct)
 {
     sType = in_struct->sType;
-    pNext = in_struct->pNext;
     storageTexelBufferOffsetAlignmentBytes = in_struct->storageTexelBufferOffsetAlignmentBytes;
     storageTexelBufferOffsetSingleTexelAlignment = in_struct->storageTexelBufferOffsetSingleTexelAlignment;
     uniformTexelBufferOffsetAlignmentBytes = in_struct->uniformTexelBufferOffsetAlignmentBytes;
     uniformTexelBufferOffsetSingleTexelAlignment = in_struct->uniformTexelBufferOffsetSingleTexelAlignment;
+    pNext = SafePnextCopy(in_struct->pNext);
 }
 
 void safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT::initialize(const safe_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* src)
 {
     sType = src->sType;
-    pNext = src->pNext;
     storageTexelBufferOffsetAlignmentBytes = src->storageTexelBufferOffsetAlignmentBytes;
     storageTexelBufferOffsetSingleTexelAlignment = src->storageTexelBufferOffsetSingleTexelAlignment;
     uniformTexelBufferOffsetAlignmentBytes = src->uniformTexelBufferOffsetAlignmentBytes;
     uniformTexelBufferOffsetSingleTexelAlignment = src->uniformTexelBufferOffsetSingleTexelAlignment;
+    pNext = SafePnextCopy(src->pNext);
 }
 
 void *SafePnextCopy(const void *pNext) {
