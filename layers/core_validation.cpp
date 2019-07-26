@@ -646,7 +646,7 @@ bool CoreChecks::ValidateDeviceQueueFamily(uint32_t queue_family, const char *cm
 
 bool CoreChecks::ValidateQueueFamilies(uint32_t queue_family_count, const uint32_t *queue_families, const char *cmd_name,
                                        const char *array_parameter_name, const char *unique_error_code,
-                                       const char *valid_error_code, bool optional = false) {
+                                       const char *valid_error_code, bool optional = false) const {
     bool skip = false;
     if (queue_families) {
         std::unordered_set<uint32_t> set;
@@ -12173,7 +12173,7 @@ void ValidationStateTracker::PostCallRecordCreateEvent(VkDevice device, const Vk
 }
 
 bool CoreChecks::ValidateCreateSwapchain(const char *func_name, VkSwapchainCreateInfoKHR const *pCreateInfo,
-                                         SURFACE_STATE *surface_state, SWAPCHAIN_NODE *old_swapchain_state) {
+                                         const SURFACE_STATE *surface_state, const SWAPCHAIN_NODE *old_swapchain_state) const {
     // All physical devices and queue families are required to be able to present to any native window on Android; require the
     // application to have established support on any other platform.
     if (!instance_extensions.vk_khr_android_surface) {
@@ -12360,7 +12360,7 @@ bool CoreChecks::ValidateCreateSwapchain(const char *func_name, VkSwapchainCreat
     }
 
     std::vector<VkSurfaceFormatKHR> surface_formats;
-    auto surface_formats_ref = &surface_formats;
+    const auto *surface_formats_ref = &surface_formats;
 
     // Validate pCreateInfo values with the results of vkGetPhysicalDeviceSurfaceFormatsKHR():
     if (physical_device_state->vkGetPhysicalDeviceSurfaceFormatsKHRState != QUERY_DETAILS) {
@@ -12513,14 +12513,14 @@ bool CoreChecks::ValidateCreateSwapchain(const char *func_name, VkSwapchainCreat
 
 bool CoreChecks::PreCallValidateCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo,
                                                    const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchain) {
-    auto surface_state = GetSurfaceState(pCreateInfo->surface);
-    auto old_swapchain_state = GetSwapchainState(pCreateInfo->oldSwapchain);
+    const auto surface_state = GetSurfaceState(pCreateInfo->surface);
+    const auto old_swapchain_state = GetSwapchainState(pCreateInfo->oldSwapchain);
     return ValidateCreateSwapchain("vkCreateSwapchainKHR()", pCreateInfo, surface_state, old_swapchain_state);
 }
 
-void CoreChecks::RecordCreateSwapchainState(VkResult result, const VkSwapchainCreateInfoKHR *pCreateInfo,
-                                            VkSwapchainKHR *pSwapchain, SURFACE_STATE *surface_state,
-                                            SWAPCHAIN_NODE *old_swapchain_state) {
+void ValidationStateTracker::RecordCreateSwapchainState(VkResult result, const VkSwapchainCreateInfoKHR *pCreateInfo,
+                                                        VkSwapchainKHR *pSwapchain, SURFACE_STATE *surface_state,
+                                                        SWAPCHAIN_NODE *old_swapchain_state) {
     if (VK_SUCCESS == result) {
         auto swapchain_state = unique_ptr<SWAPCHAIN_NODE>(new SWAPCHAIN_NODE(pCreateInfo, *pSwapchain));
         if (VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR == pCreateInfo->presentMode ||
@@ -12539,21 +12539,38 @@ void CoreChecks::RecordCreateSwapchainState(VkResult result, const VkSwapchainCr
     return;
 }
 
-void CoreChecks::PostCallRecordCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo,
-                                                  const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchain,
-                                                  VkResult result) {
+void ValidationStateTracker::PostCallRecordCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo,
+                                                              const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchain,
+                                                              VkResult result) {
     auto surface_state = GetSurfaceState(pCreateInfo->surface);
     auto old_swapchain_state = GetSwapchainState(pCreateInfo->oldSwapchain);
     RecordCreateSwapchainState(result, pCreateInfo, pSwapchain, surface_state, old_swapchain_state);
 }
 
-void CoreChecks::PreCallRecordDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapchain,
-                                                  const VkAllocationCallbacks *pAllocator) {
+void ValidationStateTracker::PreCallRecordDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapchain,
+                                                              const VkAllocationCallbacks *pAllocator) {
     if (!swapchain) return;
     auto swapchain_data = GetSwapchainState(swapchain);
     if (swapchain_data) {
-        if (swapchain_data->images.size() > 0) {
-            for (auto swapchain_image : swapchain_data->images) {
+        for (const auto &swapchain_image : swapchain_data->images) {
+            ClearMemoryObjectBindings(VulkanTypedHandle(swapchain_image, kVulkanObjectTypeImage));
+            imageMap.erase(swapchain_image);
+        }
+
+        auto surface_state = GetSurfaceState(swapchain_data->createInfo.surface);
+        if (surface_state) {
+            if (surface_state->swapchain == swapchain_data) surface_state->swapchain = nullptr;
+        }
+
+        swapchainMap.erase(swapchain);
+    }
+}
+void CoreChecks::PreCallRecordDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapchain,
+                                                  const VkAllocationCallbacks *pAllocator) {
+    if (swapchain) {
+        auto swapchain_data = GetSwapchainState(swapchain);
+        if (swapchain_data) {
+            for (const auto &swapchain_image : swapchain_data->images) {
                 auto image_sub = imageSubresourceMap.find(swapchain_image);
                 if (image_sub != imageSubresourceMap.end()) {
                     for (auto imgsubpair : image_sub->second) {
@@ -12564,19 +12581,11 @@ void CoreChecks::PreCallRecordDestroySwapchainKHR(VkDevice device, VkSwapchainKH
                     }
                     imageSubresourceMap.erase(image_sub);
                 }
-                ClearMemoryObjectBindings(VulkanTypedHandle(swapchain_image, kVulkanObjectTypeImage));
                 EraseQFOImageRelaseBarriers(swapchain_image);
-                imageMap.erase(swapchain_image);
             }
         }
-
-        auto surface_state = GetSurfaceState(swapchain_data->createInfo.surface);
-        if (surface_state) {
-            if (surface_state->swapchain == swapchain_data) surface_state->swapchain = nullptr;
-        }
-
-        swapchainMap.erase(swapchain);
     }
+    StateTracker::PreCallRecordDestroySwapchainKHR(device, swapchain, pAllocator);
 }
 
 bool CoreChecks::PreCallValidateGetSwapchainImagesKHR(VkDevice device, VkSwapchainKHR swapchain, uint32_t *pSwapchainImageCount,
@@ -12813,8 +12822,8 @@ bool CoreChecks::PreCallValidateCreateSharedSwapchainsKHR(VkDevice device, uint3
     bool skip = false;
     if (pCreateInfos) {
         for (uint32_t i = 0; i < swapchainCount; i++) {
-            auto surface_state = GetSurfaceState(pCreateInfos[i].surface);
-            auto old_swapchain_state = GetSwapchainState(pCreateInfos[i].oldSwapchain);
+            const auto surface_state = GetSurfaceState(pCreateInfos[i].surface);
+            const auto old_swapchain_state = GetSwapchainState(pCreateInfos[i].oldSwapchain);
             std::stringstream func_name;
             func_name << "vkCreateSharedSwapchainsKHR[" << swapchainCount << "]()";
             skip |= ValidateCreateSwapchain(func_name.str().c_str(), &pCreateInfos[i], surface_state, old_swapchain_state);
@@ -12823,10 +12832,10 @@ bool CoreChecks::PreCallValidateCreateSharedSwapchainsKHR(VkDevice device, uint3
     return skip;
 }
 
-void CoreChecks::PostCallRecordCreateSharedSwapchainsKHR(VkDevice device, uint32_t swapchainCount,
-                                                         const VkSwapchainCreateInfoKHR *pCreateInfos,
-                                                         const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchains,
-                                                         VkResult result) {
+void ValidationStateTracker::PostCallRecordCreateSharedSwapchainsKHR(VkDevice device, uint32_t swapchainCount,
+                                                                     const VkSwapchainCreateInfoKHR *pCreateInfos,
+                                                                     const VkAllocationCallbacks *pAllocator,
+                                                                     VkSwapchainKHR *pSwapchains, VkResult result) {
     if (pCreateInfos) {
         for (uint32_t i = 0; i < swapchainCount; i++) {
             auto surface_state = GetSurfaceState(pCreateInfos[i].surface);
@@ -13080,7 +13089,7 @@ void ValidationStateTracker::PostCallRecordGetPhysicalDeviceQueueFamilyPropertie
 
 bool CoreChecks::PreCallValidateDestroySurfaceKHR(VkInstance instance, VkSurfaceKHR surface,
                                                   const VkAllocationCallbacks *pAllocator) {
-    auto surface_state = GetSurfaceState(surface);
+    const auto surface_state = GetSurfaceState(surface);
     bool skip = false;
     if ((surface_state) && (surface_state->swapchain)) {
         skip |= log_msg(report_data, VK_DEBUG_REPORT_ERROR_BIT_EXT, VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
@@ -13090,8 +13099,8 @@ bool CoreChecks::PreCallValidateDestroySurfaceKHR(VkInstance instance, VkSurface
     return skip;
 }
 
-void CoreChecks::PreCallRecordValidateDestroySurfaceKHR(VkInstance instance, VkSurfaceKHR surface,
-                                                        const VkAllocationCallbacks *pAllocator) {
+void ValidationStateTracker::PreCallRecordDestroySurfaceKHR(VkInstance instance, VkSurfaceKHR surface,
+                                                            const VkAllocationCallbacks *pAllocator) {
     surface_map.erase(surface);
 }
 
