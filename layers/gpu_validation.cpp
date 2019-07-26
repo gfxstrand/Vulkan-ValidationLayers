@@ -233,13 +233,44 @@ void CoreChecks::GpuPreCallRecordCreateDevice(VkPhysicalDevice gpu, std::unique_
                                               VkPhysicalDeviceFeatures *supported_features) {
     if (supported_features->fragmentStoresAndAtomics || supported_features->vertexPipelineStoresAndAtomics) {
         VkPhysicalDeviceFeatures new_features = {};
+        VkBaseOutStructure *prev_struct = reinterpret_cast<VkBaseOutStructure *>(create_info.get()), *features2_struct = nullptr;
         if (create_info->pEnabledFeatures) {
+            // If pEnabledFeatures, VkPhysicalDeviceFeatures2 in pNext chain is not allowed
             new_features = *create_info->pEnabledFeatures;
+        } else {
+            // Walk the pNext chain looking for VkPhysicalDeviceFeatures2.  Keep track of previous struct so we can patch in a new
+            // VkPhysicalDeviceFeatures2 later if needed.
+            void *cur_pnext = const_cast<void *>(create_info->pNext);
+            while (cur_pnext != NULL) {
+                VkBaseOutStructure *current_struct = reinterpret_cast<VkBaseOutStructure *>(cur_pnext);
+                if (current_struct->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2) {
+                    features2_struct = current_struct;
+                    break;
+                } else {
+                    prev_struct = current_struct;
+                    cur_pnext = current_struct->pNext;
+                }
+            }
+            if (features2_struct) new_features = reinterpret_cast<VkPhysicalDeviceFeatures2 *>(features2_struct)->features;
         }
+
+        if (new_features.fragmentStoresAndAtomics && new_features.vertexPipelineStoresAndAtomics) return;
+
         new_features.fragmentStoresAndAtomics = supported_features->fragmentStoresAndAtomics;
         new_features.vertexPipelineStoresAndAtomics = supported_features->vertexPipelineStoresAndAtomics;
-        delete create_info->pEnabledFeatures;
-        create_info->pEnabledFeatures = new VkPhysicalDeviceFeatures(new_features);
+        if (create_info->pEnabledFeatures || nullptr == features2_struct) {
+            // pEnabledFeatures present, or (no pEnabledFeatures and no VkPhysicalDeviceFeatures2)
+            // Just use pEnebledFeatures
+            delete create_info->pEnabledFeatures;
+            create_info->pEnabledFeatures = new VkPhysicalDeviceFeatures(new_features);
+        } else {
+            // Patch in new features2 struct with new features enabled
+            auto new_features2 = new VkPhysicalDeviceFeatures2;
+            new_features2->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+            new_features2->features = new_features;
+            new_features2->pNext = features2_struct->pNext;
+            prev_struct->pNext = reinterpret_cast<VkBaseOutStructure *>(new_features2);
+        }
     }
 }
 
